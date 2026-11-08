@@ -54,7 +54,7 @@ figure{margin:24px 0}
 figure img{max-width:100%;display:block;border:1px solid var(--line);border-radius:6px;background:#fff}
 figcaption{font-family:var(--display);font-size:.84rem;color:var(--muted);margin-top:8px}
 figcaption b{color:var(--ink)}
-.wide{width:min(960px,calc(100vw - 48px))}
+.wide{width:100%}
 .tablewrap{overflow-x:auto;margin:18px 0}
 table{border-collapse:collapse;width:100%;font-family:var(--display);font-size:.9rem;font-variant-numeric:tabular-nums}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -77,6 +77,14 @@ ol.steps{padding-left:1.2em} ol.steps li{margin:6px 0}
 .video{border:2px dashed var(--line);border-radius:8px;padding:28px;text-align:center;font-family:var(--display);color:var(--muted)}
 .note{font-family:var(--display);font-size:.9rem;padding:12px 16px;border:1px solid var(--line);border-left:4px solid var(--tx);background:var(--surface);border-radius:4px}
 .refs li{margin:8px 0;font-size:.96rem}
+.declaracion{margin:18px 0 0;padding:12px 16px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:.95rem;font-style:italic;color:var(--muted)}
+.gloss{display:grid;gap:8px;margin:16px 0}
+.gloss details{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:8px 14px}
+.gloss summary{cursor:pointer;font-family:var(--display);font-weight:600}
+.gloss p{margin:8px 0 2px;font-size:.98rem}
+.share{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.share a{font-family:var(--display);font-size:.88rem;padding:7px 14px;border:1px solid var(--accent);border-radius:999px;text-decoration:none}
+.share a:hover{background:var(--accent-soft)}
 footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--display);font-size:.85rem;color:var(--muted)}
 @media (max-width:900px){.wrap{grid-template-columns:1fr;gap:0} nav.toc{position:static;padding:24px 0 0} nav.toc ol{grid-template-columns:repeat(2,1fr)} .wide{width:100%}}
 @media (max-width:480px){nav.toc ol{grid-template-columns:1fr} .log div{grid-template-columns:1fr;gap:2px}}
@@ -92,6 +100,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <li><a href="#diseno">Diseño técnico</a></li>
     <li><a href="#gnuradio">GNU Radio</a></li>
     <li><a href="#resultados">Experimentos y resultados</a></li>
+    <li><a href="#glosario">Glosario</a></li>
     <li><a href="#multimedia">Multimedia</a></li>
     <li><a href="#bitacora">Bitácora</a></li>
     <li><a href="#reflexion">Reflexión</a></li>
@@ -104,6 +113,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <header class="hero" id="inicio">
   <p class="kicker">Comunicaciones II · Proyecto Integrador 2026 · Escenario S5</p>
   <h1>¿Por qué un receptor FSK falla con 24 dB de E<sub>b</sub>/N<sub>0</sub>? Telemetría binaria en una planta de agua</h1>
+  <p class="declaracion">“La presente Divulgación Pública de la Ciencia, a través del siguiente Desarrollo Web, tiene una ruta de circulación nacional sin enfoque diferencial y está dirigido a la comunidad o público objetivo conformado por jóvenes, adultos, empresarios y/o empresa en género literario informativo de tipo Blog, con componente digital a través de soporte web”.</p>
   <div class="meta"><span>Jorge Mario Sánchez Arévalo (2234630)</span><span>Sebastián Díaz Zuleta (2224034)</span><span>Ferney Esteban Vinasco Flórez (2202935)</span><span>Grupo E1 · UIS</span><span>Noviembre de 2026</span></div>
   <figure>
     <img src="img/fig01_escenario_contextual.png" alt="Planta de tratamiento de agua en vista de planta con tres nodos transmisores, una sala de control con el receptor y el ruido AWGN como perturbación">
@@ -196,6 +206,21 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <p class="note">Las cifras de BER provienen de un modelo numérico en Python que reproduce la cadena del GRC con los mismos retardos y la misma regla de muestreo (10⁵ bits por prueba). El código está en la carpeta <code>simulacion_referencia/</code> del repositorio. Luego ejecutamos el GRC en GNU Radio 3.10.12: A y B sin errores; en C, R1 = 0.022–0.033 y R2 = 0; en D, R1 = 0.155–0.169 y R2 = 0, en línea con el modelo.</p>
 </section>
 
+<section id="glosario">
+<h2>Glosario</h2>
+<p>Haz clic en cada término para ver su definición.</p>
+<div class="gloss">
+<details><summary>BFSK / CPFSK</summary><p>Modulación por desplazamiento de frecuencia binaria: el bit 1 se envía con un tono en +Δf y el bit 0 en −Δf. En CPFSK la fase es continua entre símbolos, lo que reduce los lóbulos laterales del espectro.</p></details>
+<details><summary>Índice de modulación h</summary><p>h = 2Δf/R<sub>s</sub>. Relaciona la separación de los tonos con la tasa de símbolos; con h entero los tonos son ortogonales. Aquí h = 2.</p></details>
+<details><summary>AWGN</summary><p>Ruido blanco gaussiano aditivo: modelo del ruido térmico del receptor, con la misma potencia en todas las frecuencias. En GNU Radio se controla con <code>noise_voltage</code>.</p></details>
+<details><summary>E<sub>b</sub>/N<sub>0</sub></summary><p>Energía por bit dividida por la densidad de ruido. Permite comparar modulaciones con distintas tasas; en este proyecto E<sub>b</sub>/N<sub>0</sub> = 100/σ².</p></details>
+<details><summary>BER</summary><p>Tasa de error de bit: fracción de bits recibidos que no coinciden con los transmitidos. El GRC la estima en ventanas de 1000 bits.</p></details>
+<details><summary>Discriminador de frecuencia</summary><p>Bloque que mide cuánto gira la fase entre dos muestras para obtener la frecuencia instantánea. En GNU Radio es <i>Quadrature Demod</i>.</p></details>
+<details><summary>Efecto umbral (clicks)</summary><p>Cuando la SNR a la entrada del discriminador baja de unos 10 dB, el ruido hace saltar la fase casi 2π y aparecen impulsos en la salida. Es la causa de los errores de R1.</p></details>
+<details><summary>Diagrama de ojo</summary><p>Superposición de muchos intervalos de símbolo. Donde el “ojo” está más abierto está el mejor instante para tomar la decisión.</p></details>
+</div>
+</section>
+
 <section id="multimedia">
 <h2>Multimedia</h2>
 <div class="gallery">
@@ -257,7 +282,13 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <h2>Comentarios</h2>
 <p>¿Te quedó clara la explicación del efecto umbral? ¿Qué cambiarías en el receptor? Déjanos tu comentario o pregunta en el repositorio:</p>
 <p><a href="https://github.com/Fervi23/ComunicacionesII_GrupoE1/issues">Abrir un comentario en GitHub Issues</a></p>
-<p class="note"><b>Declaración de originalidad y responsabilidad.</b> Jorge Mario Sánchez Arévalo, Sebastián Díaz Zuleta y Ferney Esteban Vinasco Flórez declaramos que este trabajo es de nuestra autoría, que citamos las fuentes utilizadas, que declaramos el uso de herramientas de IA y que respondemos por la veracidad técnica del contenido. (Reemplazar por el texto oficial del reto ABET SO7.)</p>
+<p>También puedes comentar en el foro del aula virtual del curso, donde publicamos el enlace a este blog. Las opiniones que recibamos se resumirán aquí como retroalimentación.</p>
+<div class="share" aria-label="Compartir">
+  <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ffervi23.github.io%2FComunicacionesII_GrupoE1%2Fblog%2F">Compartir en LinkedIn</a>
+  <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Ffervi23.github.io%2FComunicacionesII_GrupoE1%2Fblog%2F&amp;text=Telemetr%C3%ADa%20BFSK%20en%20GNU%20Radio">Compartir en X</a>
+  <a href="https://github.com/Fervi23/ComunicacionesII_GrupoE1">Ver el repositorio</a>
+</div>
+<p class="note"><b>Autoría y responsabilidad.</b> Jorge Mario Sánchez Arévalo, Sebastián Díaz Zuleta y Ferney Esteban Vinasco Flórez declaramos que este trabajo es de nuestra autoría, que citamos las fuentes utilizadas, que declaramos el uso de herramientas de IA y que respondemos por la veracidad técnica del contenido.</p>
 </section>
 
 <footer>Comunicaciones II (27145) · Universidad Industrial de Santander · Repositorio: <a href="https://github.com/Fervi23/ComunicacionesII_GrupoE1">github.com/Fervi23/ComunicacionesII_GrupoE1</a></footer>
