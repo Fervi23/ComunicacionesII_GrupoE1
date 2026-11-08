@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetría BFSK en planta de agua</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: columna de lectura de ~68 caracteres con índice fijo a la izquierda en pantallas anchas */
+  --bg:#f5f7f8; --surface:#ffffff; --ink:#15212b; --muted:#56636e; --line:#d7dee3;
+  --accent:#1f7a70; --accent-soft:#e2f1ee; --noise:#c23b4f; --tx:#1f5fbf;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f161b; --surface:#16212a; --ink:#e4ebef; --muted:#9aa9b4; --line:#2a3943;
+    --accent:#4fc2b2; --accent-soft:#18332f; --noise:#ef7a8b; --tx:#7aa8ef; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f161b; --surface:#16212a; --ink:#e4ebef; --muted:#9aa9b4; --line:#2a3943;
+  --accent:#4fc2b2; --accent-soft:#18332f; --noise:#ef7a8b; --tx:#7aa8ef; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.075rem;line-height:1.62}
+a{color:var(--accent)} a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;max-width:1120px;margin:0 auto;padding:0 24px}
+nav.toc{position:sticky;top:0;align-self:start;padding:40px 0;font-family:var(--display);font-size:.86rem}
+nav.toc p{margin:0 0 10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-size:.72rem}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:s}
+nav.toc li{counter-increment:s}
+nav.toc a{color:var(--ink);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(s,decimal-leading-zero);color:var(--muted);font-family:var(--mono);font-size:.75rem;padding-top:2px}
+nav.toc a:hover{color:var(--accent)}
+main{max-width:720px;padding:40px 0 80px}
+header.hero{padding:8px 0 28px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.kicker{font-family:var(--mono);font-size:.8rem;color:var(--accent);margin:0 0 12px}
+h1,h2,h3{font-family:var(--display);line-height:1.18;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4vw,2.6rem);margin:0 0 14px}
+h2{font-size:1.5rem;margin:56px 0 12px;padding-top:12px;border-top:3px solid var(--ink);display:inline-block}
+h3{font-size:1.1rem;margin:28px 0 8px}
+.lead{font-size:1.2rem;color:var(--ink)}
+.meta{font-family:var(--display);font-size:.9rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px}
+.question{margin:22px 0 0;padding:14px 18px;background:var(--accent-soft);border-left:4px solid var(--accent);font-style:italic}
+figure{margin:24px 0}
+figure img{max-width:100%;display:block;border:1px solid var(--line);border-radius:6px;background:#fff}
+figcaption{font-family:var(--display);font-size:.84rem;color:var(--muted);margin-top:8px}
+figcaption b{color:var(--ink)}
+.wide{width:min(960px,calc(100vw - 48px))}
+.tablewrap{overflow-x:auto;margin:18px 0}
+table{border-collapse:collapse;width:100%;font-family:var(--display);font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+td.num{text-align:right;font-family:var(--mono);font-size:.85rem}
+.bad{color:var(--noise);font-weight:600} .good{color:var(--accent);font-weight:600}
+code,.mono{font-family:var(--mono);font-size:.86em}
+.eq{font-family:var(--mono);font-size:.92rem;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 16px;overflow-x:auto;margin:14px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.chip{font-family:var(--mono);font-size:.8rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.chip b{color:var(--accent)}
+ol.steps{padding-left:1.2em} ol.steps li{margin:6px 0}
+.log{display:grid;gap:14px;margin:18px 0}
+.log div{display:grid;grid-template-columns:130px 1fr;gap:14px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.log span{font-family:var(--display);font-weight:600;font-size:.88rem;color:var(--accent)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:18px 0}
+.gallery a{display:block;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff}
+.gallery img{width:100%;height:130px;object-fit:contain;display:block}
+.gallery a span{display:block;font-family:var(--display);font-size:.75rem;color:#333;padding:6px 8px;border-top:1px solid #e4e4e4;background:#fafafa}
+.video{border:2px dashed var(--line);border-radius:8px;padding:28px;text-align:center;font-family:var(--display);color:var(--muted)}
+.note{font-family:var(--display);font-size:.9rem;padding:12px 16px;border:1px solid var(--line);border-left:4px solid var(--tx);background:var(--surface);border-radius:4px}
+.refs li{margin:8px 0;font-size:.96rem}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--display);font-size:.85rem;color:var(--muted)}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;gap:0} nav.toc{position:static;padding:24px 0 0} nav.toc ol{grid-template-columns:repeat(2,1fr)} .wide{width:100%}}
+@media (max-width:480px){nav.toc ol{grid-template-columns:1fr} .log div{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="Contenido">
+  <p>Contenido</p>
+  <ol>
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#escenario">Escenario y problema</a></li>
+    <li><a href="#diseno">Diseño técnico</a></li>
+    <li><a href="#gnuradio">GNU Radio</a></li>
+    <li><a href="#resultados">Experimentos y resultados</a></li>
+    <li><a href="#multimedia">Multimedia</a></li>
+    <li><a href="#bitacora">Bitácora</a></li>
+    <li><a href="#reflexion">Reflexión</a></li>
+    <li><a href="#ia">Uso de IA</a></li>
+    <li><a href="#referencias">Referencias</a></li>
+    <li><a href="#interaccion">Comentarios</a></li>
+  </ol>
+</nav>
+<main>
+<header class="hero" id="inicio">
+  <p class="kicker">Comunicaciones II · Proyecto Integrador 2026 · Escenario S5</p>
+  <h1>¿Por qué un receptor FSK falla con 24 dB de E<sub>b</sub>/N<sub>0</sub>? Telemetría binaria en una planta de agua</h1>
+  <div class="meta"><span>Jorge Mario Sánchez Arévalo (2234630)</span><span>Sebastián Díaz Zuleta (2224034)</span><span>Ferney Esteban Vinasco Flórez (2202935)</span><span>Grupo E1 · UIS</span><span>Noviembre de 2026</span></div>
+  <figure>
+    <img src="img/fig01_escenario_contextual.png" alt="Planta de tratamiento de agua en vista de planta con tres nodos transmisores, una sala de control con el receptor y el ruido AWGN como perturbación">
+    <figcaption><b>Imagen destacada.</b> Tres nodos sensores envían sus estados a la sala de control mediante BFSK. Lo que degrada el enlace es la atenuación por distancia sumada al ruido térmico del receptor.</figcaption>
+  </figure>
+  <p class="question"><b>Pregunta guía:</b> ¿qué necesita un receptor no coherente de BFSK para recuperar sin errores los bits de un nodo lejano cuando el ruido es comparable a la señal?</p>
+</header>
+
+<section id="escenario">
+<h2>Escenario y problema</h2>
+<p class="lead">Una planta de tratamiento de agua supervisa niveles de tanques, estados de bombas y posiciones de válvulas desde una sala de control, a distancias de 80 a 300 m.</p>
+<p>Cablear cada punto es costoso, así que se usan nodos inalámbricos de bajo consumo en bandas ISM sub-GHz. En esas bandas son habituales 2-FSK y GFSK, por ejemplo en Wireless M-Bus para la lectura remota de medidores [3], [5]. Cada nodo envía tramas cortas: estados binarios y medidas lentas.</p>
+<p><b>Fenómeno físico.</b> Al aumentar la distancia, la potencia recibida cae hasta acercarse al ruido térmico del receptor. Ese ruido es aproximadamente gaussiano, blanco y aditivo, por lo que se modela como AWGN: <span class="mono">r[n] = x[n] + w[n]</span>. En GNU Radio se controla con <code>noise_voltage</code> del bloque Channel Model.</p>
+<p><b>Lectura de la imagen.</b> Tx1, Tx2 y Tx3 son los nodos con antena; las líneas discontinuas son los caminos directos hacia la antena Rx; el recuadro rojo es la perturbación modelada. El muro de concreto y la tubería metálica indican el entorno, aunque esta versión del proyecto no modela multitrayectoria.</p>
+</section>
+
+<section id="diseno">
+<h2>Diseño técnico</h2>
+<p><b>Modulación elegida: BFSK de fase continua.</b> Su envolvente es constante (permite amplificadores no lineales eficientes) y admite detección no coherente con un discriminador, sin recuperar la fase de la portadora. <b>Alternativa descartada: BPSK.</b> Necesita unos 4 dB menos de E<sub>b</sub>/N<sub>0</sub> y ocupa menos espectro, pero exige recuperar portadora y fase con osciladores baratos. A 10 kbit/s esa complejidad no se justifica.</p>
+<div class="chips" aria-label="Parámetros principales">
+  <span class="chip">M = <b>2</b></span><span class="chip">k = <b>1</b> bit/símbolo</span><span class="chip">R<sub>s</sub> = R<sub>b</sub> = <b>10 kbit/s</b></span>
+  <span class="chip">SPS = <b>100</b></span><span class="chip">f<sub>s</sub> = <b>1 MS/s</b></span><span class="chip">Δf = <b>10 kHz</b></span><span class="chip">h = <b>2</b></span><span class="chip">B ≈ <b>40 kHz</b></span>
+</div>
+<div class="eq">k = log2(M) = 1 · Rb = Rs·k = 10 kbit/s · fs = Rs·SPS = 10⁴·100 = 1 MS/s<br>h = 2Δf/Rs = 2·10 kHz / 10 kHz = 2 · B ≈ 2(Δf + Rs) = 40 kHz (Carson)</div>
+<p>La desviación de la base (20 kHz) se redujo a 10 kHz: con h = 2 los tonos siguen siendo ortogonales y el ancho de banda baja de 60 a 40 kHz. Con 10 kbit/s, 40 nodos que envían dos tramas de 64 bits por segundo ocupan el 51 % de la capacidad.</p>
+<figure>
+  <img src="img/fig03_estados_fsk.png" alt="Bits convertidos en niveles más y menos uno y en dos estados de frecuencia separados 20 kHz">
+  <figcaption><b>Dos estados de frecuencia.</b> El bit 1 se transmite en +Δf y el bit 0 en −Δf; la separación es 2Δf = 20 kHz.</figcaption>
+</figure>
+<figure>
+  <img src="img/fig12_psd_vs_desviacion.png" alt="Densidad espectral de potencia para desviaciones de 5, 10 y 20 kHz">
+  <figcaption><b>Compromiso de diseño.</b> Más desviación separa los tonos y facilita la detección, pero ensancha el espectro.</figcaption>
+</figure>
+</section>
+
+<section id="gnuradio">
+<h2>GNU Radio</h2>
+<p>Partimos de <code>Guia2_BASE_FSK_Canal_Discriminador.grc</code> y creamos <code>S5_BFSK_TxCanalRx_GrupoE1.grc</code>. El transmisor y el canal se conservan; el receptor es nuestro.</p>
+<figure class="wide">
+  <img src="img/fig02_diagrama_tecnico_tx_canal_rx.png" alt="Diagrama de bloques del transmisor, canal y receptores R1 y R2">
+  <figcaption><b>Arquitectura implementada.</b> Una mezcla ponderada (Multiply Const + Add) permite comparar R1 (discriminador directo, como en la base) y R2 (con filtro de canal).</figcaption>
+</figure>
+<ol class="steps">
+  <li><b>Filtro de selección de canal</b> (FIR paso bajo, corte 20 kHz, 241 coeficientes): deja pasar la banda útil y elimina el 96 % del ruido.</li>
+  <li><b>Quadrature Demod</b> con ganancia f<sub>s</sub>/(2πΔf): convierte la frecuencia instantánea en niveles ±1.</li>
+  <li><b>Moving Average</b> de 100 muestras: integra cada símbolo; es el filtro acoplado al pulso rectangular.</li>
+  <li><b>Skip Head (20) + Keep One in N (100)</b>: toma la última muestra de cada ventana, donde el ojo está más abierto.</li>
+  <li><b>Binary Slicer</b> con umbral 0, más una rama de validación con XOR y BER sobre 1000 bits.</li>
+</ol>
+<p class="note">El retardo del filtro (120 muestras) se compensa en R1 con un bloque Delay, de modo que ambos receptores usan el mismo instante de muestreo y la misma referencia (1 bit de retardo).</p>
+</section>
+
+<section id="resultados">
+<h2>Experimentos y resultados</h2>
+<p>Cambiamos una sola variable, <code>noise_voltage</code>, en cuatro niveles. Todo lo demás quedó fijo.</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Prueba</th><th>Severidad</th><th>noise_voltage</th><th>SNR en 1 MHz</th><th>E<sub>b</sub>/N<sub>0</sub></th><th>BER R1</th><th>BER R2</th></tr></thead>
+<tbody>
+<tr><td>A</td><td>Referencia</td><td class="num">0</td><td class="num">∞</td><td class="num">∞</td><td class="num">0</td><td class="num good">0</td></tr>
+<tr><td>B</td><td>Suave</td><td class="num">0.3</td><td class="num">10.5 dB</td><td class="num">30.5 dB</td><td class="num">0</td><td class="num good">0</td></tr>
+<tr><td>C</td><td>Media</td><td class="num">0.6</td><td class="num">4.4 dB</td><td class="num">24.4 dB</td><td class="num bad">2.4 × 10⁻²</td><td class="num good">0</td></tr>
+<tr><td>D</td><td>Fuerte</td><td class="num">0.8</td><td class="num">1.9 dB</td><td class="num">21.9 dB</td><td class="num bad">1.3 × 10⁻¹</td><td class="num good">0</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>Lo que encontramos.</b> Con 24 dB de E<sub>b</sub>/N<sub>0</sub>, un detector ideal no comete errores. Aun así, R1 falla porque su discriminador ve todo el ruido de 1 MHz: con 4.4 dB de SNR queda por debajo del umbral de unos 10 dB [4]. Aparecen <i>clicks</i>, saltos de fase de casi 2π que el integrador no logra borrar. R2 filtra antes de detectar, gana unos 14 dB de SNR y no comete errores.</p>
+<figure>
+  <img src="img/fig08_frecuencia_instantanea_C_R1_R2.png" alt="Frecuencia instantánea en la prueba C para R1 con clicks y para R2 limpia">
+  <figcaption><b>Prueba C.</b> Salida del discriminador (color), integrador (negro) y referencia Tx (discontinua).</figcaption>
+</figure>
+<h3>Verificación en GNU Radio</h3>
+<p>Ejecutamos el GRC en GNU Radio 3.10.12 y repetimos las cuatro pruebas con los dos receptores. Las capturas de la prueba C muestran lo mismo que el modelo: con R1 los clicks tapan la salida del discriminador y aparecen errores; con R2 la señal sigue la referencia y el ojo queda abierto.</p>
+<figure class="wide">
+  <img src="img/gnuradio/fig14_gnuradio_C_R1_vs_R2.png" alt="Capturas de GNU Radio en la prueba C comparando R1 y R2: frecuencia instantánea, diagrama de ojo y bits con BER">
+  <figcaption><b>GNU Radio, prueba C.</b> Izquierda R1, derecha R2. BER medida: 0.024 con R1 y 0 con R2.</figcaption>
+</figure>
+<figure class="wide">
+  <img src="img/fig09_diagramas_de_ojo.png" alt="Diagramas de ojo de R1 y R2 en las pruebas A a D">
+  <figcaption><b>Diagramas de ojo.</b> El ojo de R1 se cierra en C y D; el de R2 permanece abierto. La línea discontinua marca el instante de muestreo.</figcaption>
+</figure>
+<figure>
+  <img src="img/fig06_psd_perturbacion_C_D.png" alt="Densidad espectral de potencia en las pruebas C y D">
+  <figcaption><b>PSD.</b> El AWGN eleva un piso plano en toda la banda; el filtro de canal lo recorta fuera de ±20 kHz.</figcaption>
+</figure>
+<figure>
+  <img src="img/fig11_ber_vs_ruido.png" alt="Curvas de BER frente a Eb/N0 para R1, R2 y la teoría">
+  <figcaption><b>Síntesis.</b> El filtro de canal desplaza la curva de BER unos 13 dB.</figcaption>
+</figure>
+<p class="note">Las cifras de BER provienen de un modelo numérico en Python que reproduce la cadena del GRC con los mismos retardos y la misma regla de muestreo (10⁵ bits por prueba). El código está en la carpeta <code>simulacion_referencia/</code> del repositorio. Luego ejecutamos el GRC en GNU Radio 3.10.12: A y B sin errores; en C, R1 = 0.022–0.033 y R2 = 0; en D, R1 = 0.155–0.169 y R2 = 0, en línea con el modelo.</p>
+</section>
+
+<section id="multimedia">
+<h2>Multimedia</h2>
+<div class="gallery">
+  <a href="img/fig01_escenario_contextual.png"><img src="img/fig01_escenario_contextual.png" alt="Escenario"><span>Fig. 1 · Escenario</span></a>
+  <a href="img/fig02_diagrama_tecnico_tx_canal_rx.png"><img src="img/fig02_diagrama_tecnico_tx_canal_rx.png" alt="Diagrama técnico"><span>Fig. 2 · Diagrama técnico</span></a>
+  <a href="img/fig05_psd_referencia_A.png"><img src="img/fig05_psd_referencia_A.png" alt="PSD de referencia"><span>Fig. 5 · PSD de referencia</span></a>
+  <a href="img/fig07_frecuencia_instantanea_A.png"><img src="img/fig07_frecuencia_instantanea_A.png" alt="Frecuencia instantánea de referencia"><span>Fig. 7 · f instantánea (A)</span></a>
+  <a href="img/fig10_bits_tx_rx_C.png"><img src="img/fig10_bits_tx_rx_C.png" alt="Bits transmitidos y recuperados"><span>Fig. 10 · Bits Tx y Rx (C)</span></a>
+  <a href="img/gnuradio/GR_A_psd.png"><img src="img/gnuradio/GR_A_psd.png" alt="PSD en GNU Radio, prueba A"><span>GNU Radio · PSD (A)</span></a>
+  <a href="img/gnuradio/GR_C_R2_psd.png"><img src="img/gnuradio/GR_C_R2_psd.png" alt="PSD en GNU Radio, prueba C con R2"><span>GNU Radio · PSD (C, R2)</span></a>
+  <a href="img/gnuradio/GR_B_R1_discriminador.png"><img src="img/gnuradio/GR_B_R1_discriminador.png" alt="Discriminador R1 en la prueba B"><span>GNU Radio · discriminador (B, R1)</span></a>
+  <a href="img/gnuradio/GR_D_R1_discriminador.png"><img src="img/gnuradio/GR_D_R1_discriminador.png" alt="Discriminador R1 en la prueba D"><span>GNU Radio · discriminador (D, R1)</span></a>
+  <a href="img/gnuradio/GR_D_R1_ber.png"><img src="img/gnuradio/GR_D_R1_ber.png" alt="BER R1 en la prueba D"><span>GNU Radio · BER 0.151 (D, R1)</span></a>
+  <a href="img/gnuradio/GR_D_R2_ber.png"><img src="img/gnuradio/GR_D_R2_ber.png" alt="BER R2 en la prueba D"><span>GNU Radio · BER 0 (D, R2)</span></a>
+  <a href="img/fig13_envolvente_A_C.png"><img src="img/fig13_envolvente_A_C.png" alt="Envolvente compleja"><span>Fig. 13 · Envolvente compleja</span></a>
+</div>
+<div class="video" role="region" aria-label="Video de socialización">Video de socialización (8–10 min)<br><span class="mono">Enlace por agregar cuando se publique el video</span></div>
+</section>
+
+<section id="bitacora">
+<h2>Bitácora y aprendizaje</h2>
+<div class="log">
+  <div><span>Guía 1</span><p>Observamos envolvente, PSD y frecuencia instantánea de FSK, ideal y con AWGN. Vimos las espigas en la frecuencia instantánea, pero aún no sabíamos qué significaban para los bits.</p></div>
+  <div><span>Decisión</span><p>Elegimos S5 y BFSK. Llenamos la ficha de Decisión Técnica Ciega con predicciones antes de simular.</p></div>
+  <div><span>Δf</span><p>Bajamos la desviación de 20 a 10 kHz (h = 2) para reducir el ancho de banda a 40 kHz sin perder ortogonalidad.</p></div>
+  <div><span>Dificultad</span><p>El primer receptor (discriminador + integrador + slicer) fallaba en la prueba C con E<sub>b</sub>/N<sub>0</sub> alta. Investigamos y encontramos el efecto umbral del discriminador.</p></div>
+  <div><span>Solución</span><p>Agregamos un filtro de selección de canal antes del discriminador. El retardo del filtro (120 muestras) desplazó los bits recuperados un bit respecto a la referencia; lo resolvimos con Skip Head = 120 mod 100, la referencia Tx retardada 1 bit y un Delay en R1.</p></div>
+  <div><span>GNU Radio</span><p>Al ejecutar el GRC, cambiar de receptor con un bloque Selector desalineaba los flujos (BER ≈ 0.62). Lo reemplazamos por una mezcla ponderada en la que ambos caminos corren siempre. Con eso, los resultados en GNU Radio coinciden con el modelo.</p></div>
+  <div><span>Validación</span><p>Comparamos R1 y R2 en las cuatro pruebas y barrimos el ruido para encontrar el límite de R2.</p></div>
+</div>
+</section>
+
+<section id="reflexion">
+<h2>Reflexión metacognitiva</h2>
+<p><b>Qué aprendimos.</b> E<sub>b</sub>/N<sub>0</sub> no basta para predecir la BER de un receptor real: importa cuánto ruido deja entrar cada etapa. El diagrama de ojo fue la herramienta que más nos ayudó a entender el instante de muestreo.</p>
+<p><b>Qué cambiaríamos.</b> Habríamos medido la SNR a la entrada del discriminador desde el principio, en lugar de mirar solo la salida.</p>
+<p><b>Qué profundizaríamos.</b> Sincronización con Symbol Sync, corrección de desfase de frecuencia, GFSK y ruido impulsivo de los motores de las bombas.</p>
+</section>
+
+<section id="ia">
+<h2>Uso de IA y herramientas</h2>
+<p>Usamos GNU Radio Companion 3.10, Python (NumPy, SciPy, Matplotlib), LaTeX y Git/GitHub. Usamos un asistente de IA (Claude, de Anthropic) para redactar borradores del informe y del blog, escribir el modelo numérico de referencia y generar las figuras esquemáticas.</p>
+<p><b>Validación humana:</b> el equipo revisó cada parámetro y cada cálculo, ejecutó el GRC en GNU Radio, comparó sus capturas con el modelo y es responsable del contenido final.</p>
+</section>
+
+<section id="referencias">
+<h2>Referencias</h2>
+<ol class="refs">
+  <li>J. G. Proakis y M. Salehi, <i>Digital Communications</i>, 5.ª ed. New York, NY, USA: McGraw-Hill, 2008.</li>
+  <li>B. Sklar, <i>Digital Communications: Fundamentals and Applications</i>, 2.ª ed. Upper Saddle River, NJ, USA: Prentice Hall, 2001.</li>
+  <li>A. Harney, “Designing a wireless transceiver system to meet the Wireless M-Bus standard,” Analog Devices, Appl. Note AN-0987. <a href="https://www.analog.com/en/resources/app-notes/an-0987.html">analog.com</a></li>
+  <li>M. A. Ahaneku, “FM threshold and methods of limiting its effect on performance,” <i>Nigerian J. Technol.</i>, vol. 26, no. 1, pp. 5–11, mar. 2007. <a href="https://core.ac.uk/download/478446138.pdf">core.ac.uk</a></li>
+  <li>STMicroelectronics, “Introduction to sub-1GHz,” STM32 MCU Wiki. <a href="https://wiki.st.com/stm32mcu/wiki/Connectivity:Introduction_to_sub-1GHz">wiki.st.com</a></li>
+  <li>GNU Radio Project, documentación de bloques. <a href="https://wiki.gnuradio.org">wiki.gnuradio.org</a></li>
+</ol>
+</section>
+
+<section id="interaccion">
+<h2>Comentarios</h2>
+<p>¿Te quedó clara la explicación del efecto umbral? ¿Qué cambiarías en el receptor? Déjanos tu comentario o pregunta en el repositorio:</p>
+<p><a href="https://github.com/Fervi23/ComunicacionesII_GrupoE1/issues">Abrir un comentario en GitHub Issues</a></p>
+<p class="note"><b>Declaración de originalidad y responsabilidad.</b> Jorge Mario Sánchez Arévalo, Sebastián Díaz Zuleta y Ferney Esteban Vinasco Flórez declaramos que este trabajo es de nuestra autoría, que citamos las fuentes utilizadas, que declaramos el uso de herramientas de IA y que respondemos por la veracidad técnica del contenido. (Reemplazar por el texto oficial del reto ABET SO7.)</p>
+</section>
+
+<footer>Comunicaciones II (27145) · Universidad Industrial de Santander · Repositorio: <a href="https://github.com/Fervi23/ComunicacionesII_GrupoE1">github.com/Fervi23/ComunicacionesII_GrupoE1</a></footer>
+</main>
+</div>
+</body>
+</html>
