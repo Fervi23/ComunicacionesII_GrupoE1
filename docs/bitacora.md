@@ -13,7 +13,7 @@ Registrar fecha, responsable y commit asociado en cada entrada.
 | _(completar)_ | Alineación | El filtro introduce 120 muestras de retardo. Skip Head = 120 mod 100 = 20; referencia Tx retardada 1 bit; Delay de 120 muestras en R1 para comparar con igual latencia. | Prueba A con BER = 0 |
 | _(completar)_ | Barridos | BER vs noise_voltage (R2 falla desde σ ≈ 1.5) y BER vs Δf con R1. | data/tablas_de_pruebas |
 | 7 nov 2026 | Verificación GNU Radio | GRC ejecutado en GNU Radio 3.10.12 (radioconda). Con un bloque Selector, cambiar de R2 a R1 en ejecución daba BER ≈ 0.62 (flujos desalineados). Se reemplazó por una mezcla ponderada (Multiply Const 1−receptor / receptor + Add). Resultados: A y B sin errores; C: R1 0.022–0.033, R2 0; D: R1 0.155–0.169, R2 0. | Capturas del GRC |
-| _(completar)_ | Entrega | Informe IEEE, blog, README y video. | docs/, blog/ |
+| _(completar)_ | Entrega | Informe IEEE, blog y README. | docs/, blog/ |
 
 ## Pruebas fallidas relevantes
 
@@ -25,5 +25,4 @@ Registrar fecha, responsable y commit asociado en cada entrada.
 - [x] GRC ejecutado en GNU Radio y pruebas A–D verificadas.
 - [x] Capturas de GNU Radio de las pruebas A–D con R1 y R2 (58 imágenes) en `figures/pantallazos_GNU_radio/`; BER medidas: A 0/0, B 0/0, C 0.024/0, D 0.151/0.
 - [x] `ajuste_muestreo = 0` confirmado: BER = 0 en la prueba A.
-- [x] Integrantes y grupo (E1) agregados en informe, blog, README, guion y ficha.
-- [ ] Grabar y enlazar el video.
+- [x] Integrantes y grupo (E1) agregados en informe, blog, README y ficha.
