@@ -88,6 +88,37 @@ ol.steps{padding-left:1.2em} ol.steps li{margin:6px 0}
 footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--display);font-size:.85rem;color:var(--muted)}
 @media (max-width:900px){.wrap{grid-template-columns:1fr;gap:0} nav.toc{position:static;padding:24px 0 0} nav.toc ol{grid-template-columns:repeat(2,1fr)} .wide{width:100%}}
 @media (max-width:480px){nav.toc ol{grid-template-columns:1fr} .log div{grid-template-columns:1fr;gap:2px}}
+[hidden]{display:none!important}
+.lab{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:18px;margin:18px 0}
+.lab-ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;font-family:var(--display);font-size:.9rem}
+.ctl{display:grid;gap:8px;align-content:start}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.ctl-lab{color:var(--ink)}
+.presets,.seg{display:flex;flex-wrap:wrap;gap:6px}
+.presets button,.seg button,.game button{font-family:var(--display);font-size:.82rem;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+.presets button:hover,.seg button:hover,.game button:hover{border-color:var(--accent)}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.lab-read{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.tile{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg);display:grid;gap:2px;font-family:var(--display)}
+.tile span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.tile b{font-size:1.35rem;font-variant-numeric:tabular-nums}
+.tile small{font-size:.75rem;color:var(--muted)}
+.tile.state.ok{border-color:var(--accent);background:var(--accent-soft)}
+.tile.state.bad{border-color:var(--noise)}
+.tile.state.bad b{color:var(--noise)}
+.plot{margin:10px 0}
+.plot canvas{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.plot figcaption{margin:0 0 6px}
+.plot2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:600px){.plot2{grid-template-columns:1fr}}
+.game{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:16px 18px;margin:12px 0 0;font-family:var(--display)}
+.game-sc{font-size:1rem;margin:0 0 12px}
+.game-opts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.game-res{min-height:1.4em;font-size:.92rem}
+.game-res .ok{color:var(--accent);font-weight:600}.game-res .bad{color:var(--noise);font-weight:600}
+.game-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:10px;font-size:.9rem}
+#gameBtn{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -100,6 +131,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <li><a href="#diseno">Diseño técnico</a></li>
     <li><a href="#gnuradio">GNU Radio</a></li>
     <li><a href="#resultados">Experimentos y resultados</a></li>
+    <li><a href="#laboratorio">Laboratorio interactivo</a></li>
     <li><a href="#glosario">Glosario</a></li>
     <li><a href="#multimedia">Multimedia</a></li>
     <li><a href="#bitacora">Bitácora</a></li>
@@ -206,6 +238,55 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <p class="note">Las cifras de BER provienen de un modelo numérico en Python que reproduce la cadena del GRC con los mismos retardos y la misma regla de muestreo (10⁵ bits por prueba). El código está en la carpeta <code>simulacion_referencia/</code> del repositorio. Luego ejecutamos el GRC en GNU Radio 3.10.12: A y B sin errores; en C, R1 = 0.022–0.033 y R2 = 0; en D, R1 = 0.155–0.169 y R2 = 0, en línea con el modelo.</p>
 </section>
 
+<section id="laboratorio">
+<h2>Laboratorio interactivo</h2>
+<p class="lead">Prueba el enlace tú mismo. Esta simulación corre en tu navegador con la misma cadena del GRC: modulador CPFSK, canal AWGN, filtro de canal (solo R2), discriminador, integrador y decisión con umbral 0.</p>
+<div class="lab">
+  <div class="lab-ctl">
+    <div class="ctl">
+      <label for="labNoise">Ruido (<code>noise_voltage</code>): <b id="labNoiseVal">0.60</b></label>
+      <input type="range" id="labNoise" min="0" max="3" step="0.05" value="0.6">
+      <div class="presets" role="group" aria-label="Pruebas del plan">
+        <button type="button" data-n="0">A · 0</button><button type="button" data-n="0.3">B · 0.3</button><button type="button" data-n="0.6">C · 0.6</button><button type="button" data-n="0.8">D · 0.8</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="ctl-lab" id="labRxLab">Receptor</span>
+      <div class="seg" role="group" aria-labelledby="labRxLab">
+        <button type="button" id="labR1">R1 · discriminador directo</button><button type="button" id="labR2" class="on">R2 · filtro de canal</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label for="labDf">Desviación Δf</label>
+      <select id="labDf"><option value="5000">5 kHz (h = 1)</option><option value="10000" selected>10 kHz (h = 2)</option><option value="20000">20 kHz (h = 4)</option></select>
+    </div>
+  </div>
+  <div class="lab-read" aria-live="polite">
+    <div class="tile"><span>BER</span><b id="labBer">–</b><small id="labErr"></small></div>
+    <div class="tile"><span>E<sub>b</sub>/N<sub>0</sub></span><b id="labEb">–</b><small>100/σ²</small></div>
+    <div class="tile"><span>SNR en 1 MHz</span><b id="labSnr">–</b><small id="labSnrIn"></small></div>
+    <div class="tile state" id="labState"><span>Estado</span><b>–</b></div>
+  </div>
+  <figure class="plot"><figcaption>Frecuencia instantánea (×Δf): discriminador, integrador y referencia Tx</figcaption><canvas id="cvFreq" width="900" height="220"></canvas></figure>
+  <div class="plot2">
+    <figure class="plot"><figcaption>Diagrama de ojo a la salida del integrador</figcaption><canvas id="cvEye" width="440" height="220"></canvas></figure>
+    <figure class="plot"><figcaption>Bits Tx (gris) y Rx (color); ▼ = error</figcaption><canvas id="cvBits" width="440" height="220"></canvas></figure>
+  </div>
+  <p class="note">La BER se estima con 3000 bits aleatorios en cada cambio, así que puede variar un poco entre ejecuciones. Prueba subir el ruido con R1 y luego cambiar a R2: es el resultado principal del proyecto.</p>
+</div>
+
+<h3>Reto: ¿habrá errores?</h3>
+<p>Te mostramos un escenario. Antes de simular, predice qué pasará. Son 5 rondas.</p>
+<div class="game" id="game">
+  <p class="game-sc" id="gameSc">Pulsa “Empezar” para la primera ronda.</p>
+  <div class="game-opts" id="gameOpts" hidden>
+    <button type="button" data-c="0">Sin errores</button><button type="button" data-c="1">Pocos errores (menos de 5 %)</button><button type="button" data-c="2">Muchos errores (5 % o más)</button>
+  </div>
+  <p class="game-res" id="gameRes" aria-live="polite"></p>
+  <div class="game-foot"><span>Puntaje: <b id="gameScore">0</b> / <span id="gameRound">0</span></span><button type="button" id="gameBtn">Empezar</button></div>
+</div>
+</section>
+
 <section id="glosario">
 <h2>Glosario</h2>
 <p>Haz clic en cada término para ver su definición.</p>
@@ -294,5 +375,105 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <footer>Comunicaciones II (27145) · Universidad Industrial de Santander · Repositorio: <a href="https://github.com/Fervi23/ComunicacionesII_GrupoE1">github.com/Fervi23/ComunicacionesII_GrupoE1</a></footer>
 </main>
 </div>
+<script>
+// Núcleo de simulación (mismo modelo que simulacion_referencia/modelo.py)
+const FS=1e6, SPS=100, RS=FS/SPS, PAT=[0,1,0,0,1,1,0,1,1,1,0,0,1,0,1,0];
+function lpfTaps(fc,tw){let n=Math.floor(53*FS/(22*tw)); if(n%2===0)n++;
+  const h=new Float64Array(n); let s=0;
+  for(let i=0;i<n;i++){const m=i-(n-1)/2, x=2*fc/FS*m;
+    const sinc=x===0?1:Math.sin(Math.PI*x)/(Math.PI*x);
+    const w=0.54-0.46*Math.cos(2*Math.PI*i/(n-1)); h[i]=2*fc/FS*sinc*w; s+=h[i];}
+  for(let i=0;i<n;i++)h[i]/=s; return h;}
+function gauss(){let u=0,v=0; while(u===0)u=Math.random(); v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function simulate(nbits,sigma,df,useFilter,randomBits){
+  const bits=new Uint8Array(nbits);
+  for(let k=0;k<nbits;k++)bits[k]=randomBits?(Math.random()<0.5?0:1):PAT[k%16];
+  const N=nbits*SPS, re=new Float64Array(N), im=new Float64Array(N), m=new Float64Array(N);
+  let ph=0; const k0=2*Math.PI*df/FS, a=sigma/Math.SQRT2;
+  for(let i=0;i<N;i++){const mi=2*bits[Math.floor(i/SPS)]-1; m[i]=mi; ph+=k0*mi;
+    re[i]=Math.cos(ph)+a*gauss(); im[i]=Math.sin(ph)+a*gauss();}
+  let D=0, rr=re, ri=im;
+  if(useFilter){const h=lpfTaps(df+RS,10e3), L=h.length; D=(L-1)/2;
+    rr=new Float64Array(N); ri=new Float64Array(N);
+    for(let i=0;i<N;i++){let sr=0,si=0; const j0=Math.max(0,i-L+1);
+      for(let j=j0;j<=i;j++){const c=h[i-j]; sr+=c*re[j]; si+=c*im[j];}
+      rr[i]=sr; ri[i]=si;}}
+  const g=FS/(2*Math.PI*df), y=new Float64Array(N);
+  for(let i=1;i<N;i++){const xr=rr[i]*rr[i-1]+ri[i]*ri[i-1], xi=ri[i]*rr[i-1]-rr[i]*ri[i-1];
+    y[i]=g*Math.atan2(xi,xr);}
+  const ma=new Float64Array(N); let acc=0;
+  for(let i=0;i<N;i++){acc+=y[i]; if(i>=SPS)acc-=y[i-SPS]; ma[i]=acc/SPS;}
+  const dec=[], errs=[]; let ne=0, nb=0;
+  for(let k=2;k<nbits;k++){const idx=k*SPS+SPS-1+D; if(idx>=N)break;
+    const b=ma[idx]>=0?1:0; dec.push(b); const e=b!==bits[k]; errs.push(e); if(e)ne++; nb++;}
+  return {bits,m,y,ma,D,dec,errs,ne,nb,ber:ne/nb};}
+if(typeof module!=='undefined')module.exports={simulate};
+
+(function(){
+const $=id=>document.getElementById(id);
+const st={sigma:0.6,df:10000,filt:true};
+let timer=null;
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||'#888';}
+function axes(ctx,W,H,ymin,ymax){ctx.clearRect(0,0,W,H);ctx.strokeStyle=tok('--line');ctx.lineWidth=1;
+  const Y=v=>H-8-(v-ymin)/(ymax-ymin)*(H-16);
+  for(const v of [-1,0,1]){ctx.beginPath();ctx.moveTo(0,Y(v));ctx.lineTo(W,Y(v));ctx.stroke();}
+  ctx.fillStyle=tok('--muted');ctx.font='11px sans-serif';for(const v of [-1,0,1])ctx.fillText(String(v),4,Y(v)-3);return Y;}
+function drawFreq(r){const c=$('cvFreq'),x=c.getContext('2d'),W=c.width,H=c.height,n0=4*100,n=16*100;
+  const Y=axes(x,W,H,-3,3),X=i=>(i-n0)/n*W;
+  x.strokeStyle=st.filt?tok('--accent'):tok('--noise');x.globalAlpha=.55;x.lineWidth=1;x.beginPath();
+  for(let i=n0;i<n0+n;i++){const v=Math.max(-3,Math.min(3,r.y[i+r.D]));i===n0?x.moveTo(X(i),Y(v)):x.lineTo(X(i),Y(v));}x.stroke();x.globalAlpha=1;
+  x.strokeStyle=tok('--muted');x.setLineDash([5,4]);x.beginPath();
+  for(let i=n0;i<n0+n;i++){i===n0?x.moveTo(X(i),Y(r.m[i])):x.lineTo(X(i),Y(r.m[i]));}x.stroke();x.setLineDash([]);
+  x.strokeStyle=tok('--ink');x.lineWidth=2;x.beginPath();
+  for(let i=n0;i<n0+n;i++){const v=Math.max(-3,Math.min(3,r.ma[i+r.D]));i===n0?x.moveTo(X(i),Y(v)):x.lineTo(X(i),Y(v));}x.stroke();}
+function drawEye(r){const c=$('cvEye'),x=c.getContext('2d'),W=c.width,H=c.height;const Y=axes(x,W,H,-2,2);
+  x.strokeStyle=st.filt?tok('--accent'):tok('--noise');x.globalAlpha=.25;x.lineWidth=1;
+  for(let k=3;k<83;k++){const s=k*100+99+r.D-100;x.beginPath();
+    for(let j=0;j<200;j++){const v=Math.max(-2,Math.min(2,r.ma[s+j]||0));j?x.lineTo(j/199*W,Y(v)):x.moveTo(0,Y(v));}x.stroke();}
+  x.globalAlpha=1;x.strokeStyle=tok('--ink');x.setLineDash([4,4]);x.beginPath();x.moveTo(100/199*W,0);x.lineTo(100/199*W,H);x.stroke();x.setLineDash([]);}
+function drawBits(r){const c=$('cvBits'),x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);
+  const nb=32,k0=2,bw=W/nb,yb=v=>v?60:150;
+  for(let k=0;k<nb;k++){const tx=r.bits[k+k0],rx=r.dec[k],X=k*bw;
+    x.fillStyle=tok('--muted');x.globalAlpha=.45;x.fillRect(X+2,yb(tx),bw-4,24);x.globalAlpha=1;
+    x.fillStyle=r.errs[k]?tok('--noise'):(st.filt?tok('--accent'):tok('--tx'));x.fillRect(X+2,yb(rx)+30,bw-4,8);
+    if(r.errs[k]){x.fillStyle=tok('--noise');x.font='bold 14px sans-serif';x.fillText('▼',X+bw/2-6,40);}}
+  x.fillStyle=tok('--muted');x.font='11px sans-serif';x.fillText('1',4,74);x.fillText('0',4,164);}
+function fmtBer(b){return b===0?'0':(b<1e-3?b.toExponential(1):b.toFixed(3));}
+function run(){const s=st.sigma,r=simulate(3000,s,st.df,st.filt,true);
+  $('labBer').textContent=fmtBer(r.ber);$('labErr').textContent=r.ne+' errores en '+r.nb+' bits';
+  $('labEb').textContent=s===0?'∞':(20-20*Math.log10(s)).toFixed(1)+' dB';
+  $('labSnr').textContent=s===0?'∞':(-20*Math.log10(s)).toFixed(1)+' dB';
+  $('labSnrIn').textContent=st.filt&&s>0?'≈ '+(-20*Math.log10(s)+10*Math.log10(1e6/(2*(st.df+1e4)))).toFixed(1)+' dB tras el filtro':'entrada al discriminador';
+  const t=$('labState');t.className='tile state '+(r.ne===0?'ok':'bad');
+  t.querySelector('b').textContent=r.ne===0?'Sin errores':(r.ber<0.05?'Errores aislados':'Enlace degradado');
+  drawFreq(r);drawEye(r);drawBits(r);}
+function schedule(){clearTimeout(timer);$('labState').querySelector('b').textContent='Simulando…';timer=setTimeout(run,120);}
+$('labNoise').addEventListener('input',e=>{st.sigma=+e.target.value;$('labNoiseVal').textContent=st.sigma.toFixed(2);schedule();});
+document.querySelectorAll('.presets button').forEach(b=>b.addEventListener('click',()=>{st.sigma=+b.dataset.n;$('labNoise').value=st.sigma;$('labNoiseVal').textContent=st.sigma.toFixed(2);schedule();}));
+$('labR1').addEventListener('click',()=>{st.filt=false;$('labR1').classList.add('on');$('labR2').classList.remove('on');schedule();});
+$('labR2').addEventListener('click',()=>{st.filt=true;$('labR2').classList.add('on');$('labR1').classList.remove('on');schedule();});
+$('labDf').addEventListener('change',e=>{st.df=+e.target.value;schedule();});
+run();
+// ---- Reto ----
+const G={round:0,score:0,cur:null,max:5};
+const pool=[0.2,0.3,0.45,0.6,0.7,0.8,1.0,1.5,2.5,3.0];
+const cat=b=>b===0?0:(b<0.05?1:2), names=['sin errores','pocos errores','muchos errores'];
+function next(){if(G.round>=G.max){$('gameSc').textContent='Terminaste el reto con '+G.score+' de '+G.max+' aciertos. ¿Otra vez?';$('gameOpts').hidden=true;$('gameBtn').textContent='Reiniciar';$('gameBtn').hidden=false;G.round=0;G.score=0;return;}
+  const s=pool[Math.floor(Math.random()*pool.length)],f=Math.random()<0.5;
+  G.cur={s,f};G.round++;$('gameRound').textContent=G.round;$('gameScore').textContent=G.score;
+  $('gameSc').innerHTML='Ronda '+G.round+': <b>noise_voltage = '+s+'</b> con <b>'+(f?'R2 (filtro de canal)':'R1 (discriminador directo)')+'</b>, Δf = 10 kHz. ¿Qué pasará?';
+  $('gameRes').textContent='';$('gameOpts').hidden=false;$('gameBtn').hidden=true;}
+document.querySelectorAll('#gameOpts button').forEach(b=>b.addEventListener('click',()=>{
+  $('gameOpts').hidden=true;$('gameRes').textContent='Simulando 3000 bits…';
+  setTimeout(()=>{const r=simulate(3000,G.cur.s,10000,G.cur.f,true),c=cat(r.ber),ok=c===+b.dataset.c;if(ok)G.score++;
+    $('gameScore').textContent=G.score;
+    const why=G.cur.f?(c===0?'El filtro deja la SNR del discriminador por encima del umbral.':'Incluso con filtro, este ruido ya es muy alto.'):(c===0?'Con poco ruido el discriminador aún no entra en la región de umbral.':'Sin filtro, el discriminador ve todo el ruido de 1 MHz y aparecen clicks.');
+    $('gameRes').innerHTML='<span class="'+(ok?'ok':'bad')+'">'+(ok?'¡Correcto!':'No esta vez.')+'</span> Resultado: '+names[c]+' (BER = '+fmtBer(r.ber)+'). '+why;
+    $('gameBtn').textContent=G.round>=G.max?'Ver resultado':'Siguiente ronda';$('gameBtn').hidden=false;},30);}));
+$('gameBtn').addEventListener('click',next);
+})();
+
+</script>
 </body>
 </html>
