@@ -2,8 +2,6 @@
 
 **Blog del proyecto:** [https://Fervi23.github.io/ComunicacionesII_GrupoE1/blog/](https://Fervi23.github.io/ComunicacionesII_GrupoE1/blog/)
 
-**Video de socialización:** _enlace por agregar_
-
 Comunicaciones II (27145), Proyecto Integrador 2026, Universidad Industrial de Santander.
 
 **Grupo E1. Integrantes:**
@@ -102,8 +100,7 @@ ComunicacionesII_GrupoE1/
 ├── docs/
 │   ├── informe_final.pdf                    informe IEEE
 │   ├── ficha_decision_tecnica.pdf
-│   ├── bitacora.md
-│   └── guion_video.md
+│   └── bitacora.md
 ├── simulacion_referencia/                   modelo Python y scripts de figuras
 ├── blog/                                    blog del proyecto (GitHub Pages)
 └── referencias/fuentes_y_enlaces.md
