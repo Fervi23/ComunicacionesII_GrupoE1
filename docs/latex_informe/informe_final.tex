@@ -5,7 +5,7 @@
 \usepackage{courier}
 \usepackage[top=0.75in,bottom=1in,left=0.65in,right=0.65in,columnsep=0.22in]{geometry}
 \usepackage{amsmath,graphicx,booktabs,cite,float,stfloats}
-\usepackage[section]{placeins}
+%\usepackage[section]{placeins}
 \usepackage[font=footnotesize,labelsep=period]{caption}
 \usepackage[hidelinks]{hyperref}
 \renewcommand{\figurename}{Fig.}
@@ -40,7 +40,7 @@ Las plantas de tratamiento de agua supervisan niveles de tanques, estados de bom
 
 El escenario elegido (Fig.~\ref{fig:escenario}) contiene tres nodos (Tx1--Tx3) a distancias de 80 a 300~m del receptor. El fenómeno que degrada el enlace es la combinación de atenuación por distancia y ruido térmico del receptor: cuando la potencia recibida se acerca al piso de ruido, la señal compleja recibida se modela como $r[n]=x[n]+w[n]$, con $w[n]$ ruido gaussiano blanco complejo (AWGN). La información a transmitir son tramas cortas de estados binarios y medidas lentas.
 
-\begin{figure}[!htb]
+\begin{figure}[H]
 \centering\includegraphics[width=\columnwidth]{figures/escenario/fig01_escenario_contextual.png}
 \caption{Escenario contextual: nodos Tx con antena, trayectorias directas hacia el receptor de la sala de control, obstáculos y fuente de degradación modelada (AWGN).}
 \label{fig:escenario}
@@ -87,8 +87,8 @@ noise\_voltage & 0 / 0.3 / 0.6 / 0.8 & pruebas A--D\\
 
 La desviación se redujo de 20 a 10~kHz: con $h=1$ el espectro sería más compacto, pero la excursión del discriminador sería menor y más sensible al ruido; con $h=4$ el ancho de banda llega a 60~kHz (Fig.~\ref{fig:psddf}). Se conservan $f_s$ y $SPS$ de la base para mantener la comparabilidad con las guías anteriores.
 
-\begin{figure}[!htb]
-\centering\includegraphics[width=\columnwidth]{figures/psd/fig12_psd_vs_desviacion.png}
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\columnwidth]{figures/psd/fig12_psd_vs_desviacion.png}
 \caption{PSD de la señal transmitida para $\Delta f=5$, 10 y 20~kHz con $R_s=10$~kbaud.}
 \label{fig:psddf}
 \end{figure}
@@ -110,7 +110,7 @@ Se partió del archivo base \path{Guia2_BASE_FSK_Canal_Discriminador.grc} y se c
 \end{enumerate}
 La validación compara, con XOR, los bits recuperados con la referencia transmitida retardada $D_b=\lfloor120/100\rfloor=1$~bit, y estima la BER con un promedio móvil de 1000 bits. Se varió únicamente noise\_voltage en cuatro niveles: A (0), B (0.3), C (0.6) y D (0.8). Las métricas cuantitativas se obtuvieron con un modelo numérico en Python que reproduce la misma cadena, los mismos retardos y la misma regla de muestreo del flujograma, con $10^5$ bits por prueba, y se verificaron ejecutando el flujograma en GNU Radio 3.10.12.
 
-\begin{figure*}[!tb]
+\begin{figure*}[!t]
 \centering\includegraphics[width=0.92\textwidth]{figures/diagramas_tecnicos/fig02_diagrama_tecnico_tx_canal_rx.png}
 \caption{Diagrama técnico del sistema implementado en el GRC: transmisor CPFSK, canal AWGN, receptores R1 y R2, observación (Eye Sink) y validación por BER.}
 \label{fig:diag}
@@ -120,8 +120,8 @@ La validación compara, con XOR, los bits recuperados con la referencia transmit
 \subsection{Referencia (prueba A)}
 La PSD de la Fig.~\ref{fig:psdA} muestra dos máximos en $\pm10$~kHz y lóbulos que decaen fuera de la banda de Carson. El discriminador reproduce la onda $\pm1$ sin errores y el ojo está totalmente abierto en ambos receptores (Fig.~\ref{fig:ojos}).
 
-\begin{figure}[!htb]
-\centering\includegraphics[width=\columnwidth]{figures/psd/fig05_psd_referencia_A.png}
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\columnwidth]{figures/psd/fig05_psd_referencia_A.png}
 \caption{PSD de referencia (prueba A). Líneas punteadas: tonos en $\pm\Delta f$; discontinuas: límites de Carson.}
 \label{fig:psdA}
 \end{figure}
@@ -129,8 +129,8 @@ La PSD de la Fig.~\ref{fig:psdA} muestra dos máximos en $\pm10$~kHz y lóbulos 
 \subsection{Pruebas con ruido}
 La Tabla~\ref{tab:pruebas} resume la BER del modelo. En GNU Radio, el Number Sink (ventana de 1000 bits) mostró A y B sin errores; en C, R1 entre 0.022 y 0.033 y R2 nula; en D, R1 entre 0.155 y 0.169 y R2 nula. La Fig.~\ref{fig:gr} reúne las capturas de GNU Radio de la prueba C: con R1 la salida del discriminador está dominada por clicks y el ojo se cierra; con R2 la frecuencia instantánea sigue la referencia y el ojo permanece abierto.
 
-\begin{figure*}[!tb]
-\centering\includegraphics[width=0.9\textwidth]{figures/gnuradio/fig14_gnuradio_C_R1_vs_R2.png}
+\begin{figure*}[!t]
+\centering\includegraphics[width=0.72\textwidth]{figures/gnuradio/fig14_gnuradio_C_R1_vs_R2.png}
 \caption{Capturas de GNU Radio 3.10.12 en la prueba C (noise\_voltage $=0.6$). Izquierda: R1; derecha: R2. Filas: frecuencia instantánea, diagrama de ojo y bits Tx/Rx con la BER estimada (0.024 y 0).}
 \label{fig:gr}
 \end{figure*}
@@ -152,40 +152,43 @@ D & 0.8 & 1.9 dB & 21.9 dB & $1.3\times10^{-1}$ & 0\\
 \end{tabular}
 \end{table}
 
-\begin{figure*}[!tb]
-\centering\includegraphics[width=0.95\textwidth]{figures/psd/fig06_psd_perturbacion_C_D.png}
+\begin{figure*}[!t]
+\centering\includegraphics[width=0.75\textwidth]{figures/psd/fig06_psd_perturbacion_C_D.png}
 \caption{PSD en las pruebas C y D: señal transmitida, salida del canal y entrada al discriminador en R2.}
 \label{fig:psdCD}
 \end{figure*}
 
-\begin{figure}[!htb]
-\centering\includegraphics[width=\columnwidth]{figures/constelacion_o_fsk/fig08_frecuencia_instantanea_C_R1_R2.png}
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\columnwidth]{figures/constelacion_o_fsk/fig08_frecuencia_instantanea_C_R1_R2.png}
 \caption{Frecuencia instantánea normalizada en la prueba C: salida del discriminador, salida del integrador y referencia Tx.}
 \label{fig:finst}
 \end{figure}
 
-\begin{figure*}[!tb]
-\centering\includegraphics[width=0.95\textwidth]{figures/constelacion_o_fsk/fig09_diagramas_de_ojo.png}
-\caption{Diagramas de ojo a la salida del integrador para las pruebas A--D. Fila superior: R1; inferior: R2. La línea discontinua marca el instante de muestreo.}
-\label{fig:ojos}
-\end{figure*}
 
-\begin{figure}[!htb]
-\centering\includegraphics[width=\columnwidth]{figures/constelacion_o_fsk/fig10_bits_tx_rx_C.png}
+
+
+\section{Análisis de resultados}
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\columnwidth]{figures/constelacion_o_fsk/fig10_bits_tx_rx_C.png}
 \caption{Bits transmitidos (retardados un bit) y recuperados en la prueba C. Los triángulos marcan los errores de R1.}
 \label{fig:bits}
 \end{figure}
 
-\begin{figure}[!htb]
-\centering\includegraphics[width=\columnwidth]{figures/constelacion_o_fsk/fig11_ber_vs_ruido.png}
-\caption{BER frente a $E_b/N_0$ para R1 y R2, con la curva teórica de BFSK no coherente óptima. Las líneas punteadas indican las pruebas B--D.}
-\label{fig:ber}
-\end{figure}
+\begin{figure*}[!t]
+\centering\includegraphics[width=0.78\textwidth]{figures/constelacion_o_fsk/fig09_diagramas_de_ojo.png}
+\caption{Diagramas de ojo a la salida del integrador para las pruebas A--D. Fila superior: R1; inferior: R2. La línea discontinua marca el instante de muestreo.}
+\label{fig:ojos}
+\end{figure*}
 
-\section{Análisis de resultados}
 \textbf{Efecto umbral.} En la prueba C la $E_b/N_0$ es de 24.4~dB; un detector óptimo no cometería errores. Sin embargo, R1 registra una BER de $2.4\times10^{-2}$ porque su discriminador opera con 4.4~dB de SNR en 1~MHz, por debajo del umbral de unos 10~dB \cite{ahaneku}. El integrador promedia el ruido gaussiano pero no elimina los clicks, que se trasladan a errores (Fig.~\ref{fig:bits}). En R2 la SNR a la entrada del discriminador es de unos 18~dB y no hay errores.
 
 \textbf{Diagrama de ojo e ISI.} La ISI de R1 y R2 en la prueba A proviene de la memoria del integrador y, en R2, de la respuesta del filtro de canal; ambas se anulan en el instante de muestreo elegido, donde la ventana cubre exactamente un símbolo. En R2 el máximo es ligeramente menor que 1 (Fig.~\ref{fig:ojos}) porque el filtro suaviza las transiciones de frecuencia, pero el margen frente al umbral sigue siendo amplio.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\columnwidth]{figures/constelacion_o_fsk/fig11_ber_vs_ruido.png}
+\caption{BER frente a $E_b/N_0$ para R1 y R2, con la curva teórica de BFSK no coherente óptima. Las líneas punteadas indican las pruebas B--D.}
+\label{fig:ber}
+\end{figure}
 
 \textbf{Margen del receptor propuesto.} La Fig.~\ref{fig:ber} muestra que el filtro desplaza la curva unos 13~dB. R2 se degrada solo con noise\_voltage $\ge1.5$ (BER $=4\times10^{-5}$) y alcanza $3\times10^{-2}$ con $\sigma=3$ ($E_b/N_0=10.5$~dB). Persiste una brecha de unos 3--4~dB respecto al detector no coherente óptimo, atribuible al umbral residual del discriminador y a que el filtro de 40~kHz es más ancho que el ancho de banda de ruido del filtro acoplado ideal.
 
