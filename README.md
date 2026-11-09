@@ -77,6 +77,22 @@ Las capturas completas de las cuatro pruebas están en [`figures/pantallazos_GNU
 
 Datos completos en [`data/tablas_de_pruebas/`](data/tablas_de_pruebas/). Las BER se calcularon con el modelo numérico de [`simulacion_referencia/`](simulacion_referencia/), que reproduce la cadena del GRC con 10⁵ bits por prueba.
 
+## Prueba en hardware con HackRF One (5 de noviembre de 2026)
+
+En el laboratorio se montó un enlace real entre dos computadores, cada uno con un HackRF One. Otro grupo ejecutó el transmisor y nuestro grupo el receptor, con flujogramas 16-QAM (f<sub>c</sub> = 960 MHz, R<sub>s</sub> = 8 kbaud, R<sub>b</sub> = 32 kbit/s, RRC β = 0.5, tramas con preámbulo de 64 símbolos y CRC-32).
+
+| Prueba | Qué se envió | Resultado |
+| --- | --- | --- |
+| 1 | Texto "El Pensador" (cambiado por nosotros; el flujograma traía "LAB GNU RADIO 16QAM HACKRF 2026") | Recibido con CRC válido tras el enganche de portadora y reloj |
+| 2 | Logo UIS, 160 × 80 px, 300 paquetes de 128 B | 52 tramas con CRC válido de 19 401 (0.3 %), 15 % de la imagen, EVM = 16.7 % |
+
+![Constelación antes y después del enganche](figures/hardware_sdr/f4_constelacion.jpg)
+
+- Flujogramas: [`grc/hardware_hackrf/`](grc/hardware_hackrf/)
+- Figuras: [`figures/hardware_sdr/`](figures/hardware_sdr/)
+- Videos: [`blog/videos/`](blog/videos/)
+- Análisis completo: sección VII del [informe final](docs/informe_final.pdf)
+
 ## Conclusión principal
 
 El factor decisivo del receptor BFSK no es el decisor sino el ancho de banda de ruido que ve el discriminador. Un filtro de selección de canal antes de la detección evita el efecto umbral y mantiene el enlace sin errores en las cuatro pruebas.
@@ -88,24 +104,26 @@ ComunicacionesII_GrupoE1/
 ├── README.md
 ├── grc/
 │   ├── archivos_originales_o_referencia/   (archivos .grc entregados por el curso)
-│   └── archivos_modificados/               S5_BFSK_TxCanalRx_GrupoE1.grc
+│   ├── archivos_modificados/               S5_BFSK_TxCanalRx_GrupoE1.grc
+│   └── hardware_hackrf/                    flujogramas TX/RX 16-QAM de la prueba con HackRF
 ├── figures/
 │   ├── escenario/                           imagen contextual
 │   ├── psd/                                 PSD de referencia, bajo ruido y vs Δf
 │   ├── constelacion_o_fsk/                  frecuencia instantánea, ojos, bits, BER
 │   ├── gnuradio/                            capturas seleccionadas de GNU Radio
+│   ├── hardware_sdr/                        fotos y capturas de la prueba con HackRF
 │   ├── pantallazos_GNU_radio/               capturas completas A–D, R1 y R2
 │   └── diagramas_tecnicos/                  diagrama Tx–canal–Rx, estados FSK
 ├── data/tablas_de_pruebas/                  pruebas.csv, barridos
 ├── docs/
-│   ├── informe_final.pdf                    informe IEEE
+│   ├── informe_final.pdf                    informe IEEE (simulación + prueba con HackRF)
 │   ├── ficha_decision_tecnica.pdf
 │   └── bitacora.md
 ├── simulacion_referencia/                   modelo Python y scripts de figuras
-├── blog/                                    blog del proyecto (GitHub Pages)
+├── blog/                                    blog del proyecto (GitHub Pages), con videos/ de la prueba con HackRF
 └── referencias/fuentes_y_enlaces.md
 ```
 
 Para regenerar datos y figuras: `python3 simulacion_referencia/pruebas.py`, luego `figs.py` y `figs_esquemas.py` (requiere NumPy, SciPy y Matplotlib).
 
-_Última actualización: 6 de noviembre de 2026._
+_Última actualización: 9 de noviembre de 2026._

@@ -13,6 +13,7 @@ Registrar fecha, responsable y commit asociado en cada entrada.
 | _(completar)_ | Alineación | El filtro introduce 120 muestras de retardo. Skip Head = 120 mod 100 = 20; referencia Tx retardada 1 bit; Delay de 120 muestras en R1 para comparar con igual latencia. | Prueba A con BER = 0 |
 | _(completar)_ | Barridos | BER vs noise_voltage (R2 falla desde σ ≈ 1.5) y BER vs Δf con R1. | data/tablas_de_pruebas |
 | 7 nov 2026 | Verificación GNU Radio | GRC ejecutado en GNU Radio 3.10.12 (radioconda). Con un bloque Selector, cambiar de R2 a R1 en ejecución daba BER ≈ 0.62 (flujos desalineados). Se reemplazó por una mezcla ponderada (Multiply Const 1−receptor / receptor + Add). Resultados: A y B sin errores; C: R1 0.022–0.033, R2 0; D: R1 0.155–0.169, R2 0. | Capturas del GRC |
+| 5 nov 2026 | Prueba con HackRF One | Enlace 16-QAM entre dos computadores (otro grupo Tx, nosotros Rx). Cambiamos el mensaje a "El Pensador": recibido con CRC válido; la BER/EVM de la consola comparaba contra el texto original. Imagen del logo UIS: 52/19 401 tramas válidas, 15 % de la imagen, EVM 16.7 %. | Videos en blog/videos, figures/hardware_sdr |
 | _(completar)_ | Entrega | Informe IEEE, blog y README. | docs/, blog/ |
 
 ## Pruebas fallidas relevantes

@@ -88,6 +88,9 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 @media (max-width:900px){.wrap{grid-template-columns:1fr;gap:0} nav.toc{position:static;padding:24px 0 0} nav.toc ol{grid-template-columns:repeat(2,1fr)} .wide{width:100%}}
 @media (max-width:480px){nav.toc ol{grid-template-columns:1fr} .log div{grid-template-columns:1fr;gap:2px}}
 [hidden]{display:none!important}
+.video{margin:24px 0}
+.video video{width:100%;display:block;border:1px solid var(--line);border-radius:6px;background:#000}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}
 .lab{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:18px;margin:18px 0}
 .lab-ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;font-family:var(--display);font-size:.9rem}
 .ctl{display:grid;gap:8px;align-content:start}
@@ -130,6 +133,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <li><a href="#diseno">Diseño técnico</a></li>
     <li><a href="#gnuradio">GNU Radio</a></li>
     <li><a href="#resultados">Experimentos y resultados</a></li>
+    <li><a href="#hackrf">Prueba real con HackRF</a></li>
     <li><a href="#laboratorio">Laboratorio interactivo</a></li>
     <li><a href="#glosario">Glosario</a></li>
     <li><a href="#multimedia">Multimedia</a></li>
@@ -237,6 +241,62 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <p class="note">Las cifras de BER provienen de un modelo numérico en Python que reproduce la cadena del GRC con los mismos retardos y la misma regla de muestreo (10⁵ bits por prueba). El código está en la carpeta <code>simulacion_referencia/</code> del repositorio. Luego ejecutamos el GRC en GNU Radio 3.10.12: A y B sin errores; en C, R1 = 0.022–0.033 y R2 = 0; en D, R1 = 0.155–0.169 y R2 = 0, en línea con el modelo.</p>
 </section>
 
+<section id="hackrf">
+<h2>Del simulador al aire: prueba real con HackRF</h2>
+<p class="lead">Una simulación no tiene osciladores que se desafinan ni antenas que reciben ruido del salón. Por eso, en la Fase 4 del proyecto, el curso pasó a radios reales: dos HackRF One, cada uno conectado a un computador distinto, enviándose datos por aire en 960 MHz.</p>
+<p>Un grupo manejó el transmisor y el nuestro, el receptor. Ambos usaron flujogramas de GNU Radio con modulación 16-QAM, que agrupa los bits de a cuatro y los envía como 16 combinaciones de amplitud y fase. Se hicieron dos pruebas: primero un mensaje corto de texto y después una imagen.</p>
+<div class="chips" aria-label="Parámetros del enlace real">
+  <span class="chip">16-QAM · <b>4</b> bits/símbolo</span><span class="chip">R<sub>s</sub> = <b>8 kbaud</b></span><span class="chip">R<sub>b</sub> = <b>32 kbit/s</b></span><span class="chip">f<sub>c</sub> = <b>960 MHz</b></span><span class="chip">RRC β = <b>0.5</b></span><span class="chip">B ≈ <b>12 kHz</b></span><span class="chip">Tramas con <b>CRC-32</b></span>
+</div>
+<figure>
+  <img src="img/fase4/f4_montaje.jpg" alt="Dos HackRF One con antena sobre las mesas del laboratorio, cada uno conectado a un computador">
+  <figcaption><b>El montaje.</b> Un HackRF transmite y el otro recibe; cada uno está conectado por USB a su propio computador.</figcaption>
+</figure>
+
+<h3>Video 1: el mensaje “El Pensador”</h3>
+<figure class="video">
+  <video controls preload="metadata" playsinline poster="img/fase4/poster_prueba1.jpg">
+    <source src="videos/prueba1_mensaje_el_pensador.mp4" type="video/mp4">
+    Tu navegador no puede reproducir este video. <a href="videos/prueba1_mensaje_el_pensador.mp4">Descárgalo aquí</a>.
+  </video>
+  <figcaption><b>Prueba 1 (1 min 40 s).</b> El receptor se engancha a la señal y empieza a mostrar el mensaje enviado desde el otro computador.</figcaption>
+</figure>
+<p><b>Qué se ve.</b> Al principio la constelación del receptor es una nube de puntos sin forma: los dos radios no oscilan exactamente a la misma frecuencia y el receptor todavía no ha corregido esa diferencia. A los pocos segundos los lazos de sincronización se ajustan y aparecen los 16 grupos de la 16-QAM.</p>
+<figure class="wide">
+  <img src="img/fase4/f4_constelacion.jpg" alt="Constelación antes del enganche, una nube sin forma, y después, con 16 grupos de puntos">
+  <figcaption><b>Antes y después del enganche.</b> Izquierda: sin sincronizar. Derecha: los 16 símbolos de la 16-QAM.</figcaption>
+</figure>
+<p>Desde ese momento la consola repite <code>CRC=OK, mensaje=El Pensador</code>. Cada trama lleva un código CRC-32 que funciona como huella digital: si un solo bit cambia en el camino, la huella no coincide. Así se ve en algunas líneas, donde el texto llega alterado (“El Pefq!...”) y el receptor lo marca como <code>CRC=ERROR</code> en lugar de darlo por bueno.</p>
+<figure class="wide">
+  <img src="img/fase4/f4_consola_mensaje.jpg" alt="Consola del receptor con el mensaje El Pensador y CRC válido, y tramas con error de CRC">
+  <figcaption><b>La consola del receptor.</b> Tramas válidas con el mensaje correcto (izquierda) y tramas corruptas detectadas por el CRC (derecha).</figcaption>
+</figure>
+<p class="note"><b>Un detalle que enseña mucho.</b> El flujograma traía por defecto el texto “LAB GNU RADIO 16QAM HACKRF 2026”, y nosotros lo cambiamos por “El Pensador”. El medidor de BER y EVM siguió comparando contra el texto original, así que en la consola aparecen BER ≈ 28 % y EVM ≈ 161 %: miden la diferencia entre los dos textos, no el ruido del canal. Lo que muestra la calidad real del enlace son los CRC válidos y los 16 grupos de la constelación.</p>
+
+<h3>Video 2: el logo de la UIS, franja por franja</h3>
+<figure class="video">
+  <video controls preload="metadata" playsinline poster="img/fase4/poster_prueba2.jpg">
+    <source src="videos/prueba2_imagen_logo_uis.mp4" type="video/mp4">
+    Tu navegador no puede reproducir este video. <a href="videos/prueba2_imagen_logo_uis.mp4">Descárgalo aquí</a>.
+  </video>
+  <figcaption><b>Prueba 2 (20 s).</b> La consola del receptor y la imagen que se va reconstruyendo con los paquetes que llegan completos.</figcaption>
+</figure>
+<p><b>Qué se transmitió.</b> El logo se redujo a 160 × 80 píxeles y se partió en 300 paquetes de 128 bytes, que se envían una y otra vez. Cada paquete dice qué parte de la imagen lleva, así que el receptor puede colocarlo en su sitio aunque se pierdan otros.</p>
+<figure class="wide">
+  <img src="img/fase4/f4_imagen.jpg" alt="Logo de la UIS original junto a la imagen recibida, formada por franjas horizontales verdes y blancas sobre fondo negro">
+  <figcaption><b>Original y recibido.</b> Cada franja es un paquete que llegó íntegro; lo negro aún no ha llegado.</figcaption>
+</figure>
+<p><b>Qué se observa.</b> La imagen aparece poco a poco, en franjas verdes y blancas en su posición correcta. Tras unas 19 400 tramas, solo 52 habían pasado el CRC (0.3 %) y se había recuperado el 15 % del logo. El EVM, que aquí sí se mide contra los datos correctos, fue de 16.7 %: un MER de unos 15.5 dB.</p>
+<div class="facts">
+  <div class="tile"><span>Tramas recibidas</span><b>19 401</b></div>
+  <div class="tile"><span>Con CRC válido</span><b>52</b><small>0.3 %</small></div>
+  <div class="tile"><span>Imagen recuperada</span><b>15 %</b></div>
+  <div class="tile"><span>EVM</span><b>16.7 %</b><small>MER ≈ 15.5 dB</small></div>
+</div>
+<p><b>¿Por qué el texto llegaba seguido y la imagen tan despacio?</b> Un paquete solo sirve si todos sus símbolos llegan bien. Con esa calidad de señal, la probabilidad de acertar los 104 símbolos del mensaje corto ronda el 31 %, pero la de acertar los 288 de un paquete de imagen baja al 4 %. En la práctica fue todavía menor, porque el receptor también perdía la sincronía por momentos. A ese ritmo, completar el logo habría tomado varias horas.</p>
+<p><b>Lo que nos llevamos.</b> Pasar del simulador al aire funcionó: el enlace se sincronizó, entregó el mensaje y empezó a armar la imagen. También mostró que, con una señal regular, el tamaño del paquete importa tanto como la potencia, y que una medición solo vale si el receptor compara contra lo que de verdad se envió.</p>
+</section>
+
 <section id="laboratorio">
 <h2>Laboratorio interactivo</h2>
 <p class="lead">Prueba el enlace tú mismo. Esta simulación corre en tu navegador con la misma cadena del GRC: modulador CPFSK, canal AWGN, filtro de canal (solo R2), discriminador, integrador y decisión con umbral 0.</p>
@@ -303,6 +363,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
 
 <section id="multimedia">
 <h2>Multimedia</h2>
+<p>Los dos videos de la prueba con HackRF están en la sección <a href="#hackrf">Prueba real con HackRF</a>: <a href="videos/prueba1_mensaje_el_pensador.mp4">mensaje “El Pensador”</a> e <a href="videos/prueba2_imagen_logo_uis.mp4">imagen del logo UIS</a>.</p>
 <div class="gallery">
   <a href="img/fig01_escenario_contextual.png"><img src="img/fig01_escenario_contextual.png" alt="Escenario"><span>Fig. 1 · Escenario</span></a>
   <a href="img/fig02_diagrama_tecnico_tx_canal_rx.png"><img src="img/fig02_diagrama_tecnico_tx_canal_rx.png" alt="Diagrama técnico"><span>Fig. 2 · Diagrama técnico</span></a>
@@ -329,6 +390,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <div><span>Solución</span><p>Agregamos un filtro de selección de canal antes del discriminador. El retardo del filtro (120 muestras) desplazó los bits recuperados un bit respecto a la referencia; lo resolvimos con Skip Head = 120 mod 100, la referencia Tx retardada 1 bit y un Delay en R1.</p></div>
   <div><span>GNU Radio</span><p>Al ejecutar el GRC, cambiar de receptor con un bloque Selector desalineaba los flujos (BER ≈ 0.62). Lo reemplazamos por una mezcla ponderada en la que ambos caminos corren siempre. Con eso, los resultados en GNU Radio coinciden con el modelo.</p></div>
   <div><span>Validación</span><p>Comparamos R1 y R2 en las cuatro pruebas y barrimos el ruido para encontrar el límite de R2.</p></div>
+  <div><span>HackRF (5 nov)</span><p>Probamos un enlace 16-QAM real entre dos computadores. Cambiamos el mensaje del transmisor por “El Pensador” y lo recibimos con CRC válido; luego recibimos el 15 % del logo de la UIS. Aprendimos que la BER del receptor solo describe el canal si se compara contra lo que realmente se transmitió.</p></div>
 </div>
 </section>
 
